@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Domain Manager</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDomainModal">
+        <i class="bi bi-plus-lg"></i> Add New Domain
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Domain</th>
+                        <th>Config File</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for domain in domains %}
+                    <tr>
+                        <td class="fw-bold">{{ domain.domain }}</td>
+                        <td class="text-muted small">{{ domain.file }}</td>
+                        <td>
+                            {% if domain.enabled %}
+                            <span class="badge bg-success">Enabled</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Disabled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <form action="/domains/toggle" method="POST" class="d-inline">
+                                <input type="hidden" name="domain" value="{{ domain.domain }}">
+                                <input type="hidden" name="action" value="{{ 'disable' if domain.enabled else 'enable' }}">
+                                <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if domain.enabled else 'success' }}">
+                                    {{ 'Disable' if domain.enabled else 'Enable' }}
+                                </button>
+                            </form>
+                            <form action="/domains/delete" method="POST" class="d-inline" onsubmit="return confirm('Are you sure? This will delete the config and website files!');">
+                                <input type="hidden" name="domain" value="{{ domain.domain }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">No domains found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Domain Modal -->
+<div class="modal fade" id="addDomainModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/domains/add" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Website</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Domain Name</label>
+                        <input type="text" name="domain" class="form-control" placeholder="e.g. jarvis-clouding.sbs" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Admin Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="admin@example.com" required>
+                    </div>
+                    <div class="alert alert-info small">
+                        This will create a Virtual Host in Apache and a document root folder.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Website</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

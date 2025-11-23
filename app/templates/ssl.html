@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">SSL Manager (Let's Encrypt)</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <strong>Install New Certificate</strong>
+            </div>
+            <div class="card-body">
+                <form action="/ssl/install" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Select Domain</label>
+                        <select name="domain" class="form-select" required>
+                            {% for d in domains %}
+                                {% if d.enabled %}
+                                <option value="{{ d.domain }}">{{ d.domain }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Only enabled domains are listed.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="For renewal notifications" required>
+                    </div>
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-exclamation-triangle"></i> Ensure your domain's DNS A Record points to this server's Public IP before continuing.
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-shield-check"></i> Generate SSL
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100 bg-light">
+            <div class="card-body">
+                <h5><i class="bi bi-info-circle"></i> How it works</h5>
+                <p>This tool uses <strong>Certbot</strong> to communicate with Let's Encrypt.</p>
+                <ul>
+                    <li>It will automatically verify domain ownership via HTTP-01 challenge.</li>
+                    <li>It will install the certificate into Apache configuration.</li>
+                    <li>It will set up automatic redirect from HTTP to HTTPS.</li>
+                </ul>
+                <p class="text-muted small">Note: Port 80 must be open and accessible from the internet.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if output %}
+<div class="card mt-4 bg-dark text-white font-monospace">
+    <div class="card-header">Console Output</div>
+    <div class="card-body">
+        <pre>{{ output }}</pre>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
